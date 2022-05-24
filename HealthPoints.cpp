@@ -112,4 +112,5 @@ bool HealthPoints::operator>=(const HealthPoints healthPoints1, const HealthPoin
 std::ostream& HealthPoints::operator<<(std::ostream os , const HealthPoints healthPoints)
 {
     os << m_hp << "(" << m_maxHp << ")"
+    return os;      //heeeeeeeeeeeen shenwe
 }
