@@ -22,7 +22,67 @@ class Queue
   void pushBack(T newObject);               
   T& front();
   void popFront();
-  int size();   
+  int size(); 
+  class Iterator;
+  Iterator begin() const;
+  Iterator end() const;  
+}
+
+
+
+
+template<class T>
+class Queue<T>::Iterator {
+  const Queue<T>* m_queue;
+  int m_index;
+  Iterator(const Queue<T>* queue, int index);
+  friend class Queue<T>;
+
+public :
+  const T& operator*() const;
+  Iterator& operator++();
+  bool operator!=(const Iterator& iterator) const;
+}
+
+
+
+
+
+template<class T>
+Queue<T>::Iterator::Iterator(const Queue<T>* queue, int index) :
+m_queue(queue), m_index(index)                    //assignment operator for T
+{}
+
+template<class T>
+typename Queue<T>::Iterator Queue<T>::Iterator::begin()
+{
+  return Iterator(this,0);
+}
+
+template<class T>
+typename Queue<T>::Iterator Queue<T>::Iterator::end()
+{
+  return Iterator(this,queue.size());
+}
+
+template<class T>
+const T& Queue<T>::Iterator::operator*() const {
+  assert(index >= 0 && index < (m_queue.size()));       //replace the assert
+  return queue->m_data[index];
+}
+
+template<class T>
+typename Queue<T>::Iterator& Queue<T>::Iterator::operator++()
+{
+  m_index++;            //const iterator hmmmm
+  return *this;
+} 
+
+template<class T>
+bool Queue<T>::Iterator::operator!=(const Iterator& iterator)
+{
+  //assert(queue == i.queue);  //== operator for 
+  return ( m_index == iterator.m_index);
 }
 
 
@@ -116,7 +176,7 @@ Queue<T> filter(Queue<T> queue,Condition c)      //copy c'tor for T
 template<class T>
 Queue<T>& transform(Queue<T>& queue,Object operation)
 {
-  int size = queue.size();      //could have been done with [] operator
+  int size = queue.size();     
   while (size>0)                // > or >=
   {
   operation(queue.front());
@@ -125,22 +185,5 @@ Queue<T>& transform(Queue<T>& queue,Object operation)
   size--;
   }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 #endif //Queue_H
