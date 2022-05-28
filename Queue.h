@@ -17,8 +17,10 @@ class Queue
    
   public:
   Queue(int size = INITIAL_SIZE);         
-  Queue(Queue& queue);
+  Queue(const Queue& queue);
   ~Queue();
+  Queue& operator=(const Queue& queue);
+
   void pushBack(T newObject);               
   T& front();
   void popFront();
@@ -26,6 +28,7 @@ class Queue
   class Iterator;
   Iterator begin() const;
   Iterator end() const;  
+  class EmptyQueue{};
 }
 
 
@@ -42,6 +45,7 @@ public :
   const T& operator*() const;
   Iterator& operator++();
   bool operator!=(const Iterator& iterator) const;
+  class InvalidOperation{};
 }
 
 
@@ -62,13 +66,13 @@ typename Queue<T>::Iterator Queue<T>::Iterator::begin()
 template<class T>
 typename Queue<T>::Iterator Queue<T>::Iterator::end()
 {
-  return Iterator(this,queue.size());
+  return Iterator(this,m_queue.size());
 }
 
 template<class T>
 const T& Queue<T>::Iterator::operator*() const {
   assert(index >= 0 && index < (m_queue.size()));       //replace the assert
-  return queue->m_data[index];
+  return queue->m_data[index];   //operator ->() for Queue<T>
 }
 
 template<class T>
@@ -92,16 +96,24 @@ void Queue<T>::expand()
   int newSize = m_maxSize * EXPAND_RATE;
   try
   {
-  T* newData = new int[newSize];    //T should have a default c'tor //may be problematic answer in whatsapp group
+  T* newData = new T[newSize];    //T should have a default c'tor //may be problematic answer in whatsapp group
   }
   catch (const std::bad_alloc& e)
   {
     cerr << e.what() << endl;
   }
-  for (int i = 0; i < size; ++i) 
+  try 
+  {
+  for (int i = 0; i < m_nextIndex; ++i) //check
   {
     newData[i] = m_data[i];           //T should have assignment operator  +++bdeka
   }  
+  }
+  catch (std::exception&)
+  {
+    delete[] newData;
+    throw;
+  }
   delete[] m_data;
   m_data = newData;
   m_maxSize = newSize;
@@ -109,40 +121,112 @@ void Queue<T>::expand()
 
 template<class T>
 Queue<T>::Queue(int size):
-m_data(new T[size]),          //how to check alloc
+m_data(new T[size]),          
 m_maxSize(size),
 m_nextIndex(0)
 {
   if(size <= 0 )
   {
-    delete[] data;
-    throw InvalidSize; // sho nzrok??
+    delete[] m_data;
+    throw ; // sho nzrok??
   }
+}
+
+template<class T>
+Queue<T>::Queue(const Queue<T>& queue) : 
+m_data(new T[queue.size()]),   
+m_maxsize(queue.size()),
+m_nextindex(queue.m_nextindex)
+{
+  try{
+  for (int i=0 ; i<(queue.size()) ; ++i)
+  {
+    m_data[i]=queue.m_data[i];
+  }
+  }
+  catch (std::exception&)
+  {
+    delete m_data;
+    throw;
+  }
+}
+
+template<class T>
+Queue<T>::~Queue()
+{
+  delete[] m_data;
+}
+
+template<class T>
+Queue<T>& Queue<T>::operator=(const Queue<T>& queue)
+{
+  if (this==&queue)
+  {
+    return *this;
+  }
+  try
+  {
+  T* newData = new T[queue.size()];    //T should have a default c'tor 
+  }
+  catch (const std::bad_alloc& e)
+  {
+    cerr << e.what() << endl;
+  }
+  m_maxSize=queue.m_maxSize;
+  m_nextIndex=queue.m_maxIndex;
+  try 
+  {
+  for (int i=0 ; i<(queue.size()) ; ++i)
+  {
+    newData[i]=queue.m_data[i];
+  }
+  }
+  catch (std::exception&)
+  {
+    delete[] newData;
+    throw;
+  }
+  delete[] m_data;
+  m_data = newData;
+  return *this;
 }
 
 template<class T>
 void Queue<T>::pushBack(T newObject)
 {
-  if(nextIndex => maxSize)
+  if(nextIndex >= maxSize)
   {
     expand();
   }
-  data[nextIndex] = newObject;            //copy c'tor / assignment operator for T
+  m_data[nextIndex] = newObject;     //may need try and catch 
+ //copy c'tor / assignment operator for T
   nextIndex++; 
 }
 
 template<class T>
 T& Queue<T>::front()
-{
+{ 
+  if(m_nextIndex==0)
+  {
+    Queue<T>::EmptyQueue e();
+    throw e;
+  }
   return m_data[0];
+
+  
 }
 
 template<class T>
 void Queue<T>::popFront()
 {
+  if(m_nextIndex==0)
+  {
+    Queue<T>::EmptyQueue e();
+    throw e;
+  }
   for (int i=0 ; i<nextIndex-1 ; ++i)   //should be nextIndex-1  true
   {
-    m_data[i]=m_data[i+1];            //careful for out of bounds //change next index?
+    m_data[i]=m_data[i+1];    //maybe try catch        //careful for out of bounds //change next index?
     nextIndex--;
   }
 }
@@ -151,13 +235,23 @@ void Queue<T>::popFront()
 template<class T>
 int Queue<T>::size()
 {
-  return nextIndex; //if list is empty     no problem 
+  if(m_nextIndex==0)
+  {
+    Queue<T>::EmptyQueue e();
+    throw e;
+  }
+  return m_nextIndex; //if list is empty     no problem 
 }
 
 
 template<class T>
 Queue<T> filter(Queue<T> queue,Condition c)      //copy c'tor for T
-{                                                //template for the function object??
+{      
+  if(queue.m_nextIndex==0)
+  {
+    Queue<T>::EmptyQueue e();
+    throw e;
+  }                                          //template for the function object??
   Queue<T> filteredQueue;
   int size = queue.size();
   while(size>0)                                  //> true ? >= false
@@ -176,6 +270,11 @@ Queue<T> filter(Queue<T> queue,Condition c)      //copy c'tor for T
 template<class T>
 Queue<T>& transform(Queue<T>& queue,Object operation)
 {
+  if(queue.m_nextIndex==0)
+  {
+    Queue<T>::EmptyQueue e();
+    throw e;
+  }
   int size = queue.size();     
   while (size>0)                // > true or >= false
   {
@@ -187,21 +286,4 @@ Queue<T>& transform(Queue<T>& queue,Object operation)
 } 
 
 #endif //Queue_H
-
-Queue<T>& transform(Queue<T>& queue,Object operation)
-{
-  int size = queue.size(); 
-  Queue<T> tmp = queue
-  while(size>0)
-  {
-  queue.popFront;
-  size--;
-  }
-  while (size>0)               
-  {
-  operation(tmp.front());                 
-  queue.pushBack(tmp.front());          
-  tmp.popFront();                        
-  size--;                                 
-  }                                          
-} 
+                                         
