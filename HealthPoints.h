@@ -20,7 +20,7 @@ class HealthPoints
     HealthPoints operator+(const int extraHealth, const HealthPoints& health) const;           //fsh 7agy refrence lano int
     HealthPoints operator-(const int extraHealth, const HealthPoints& health) const;           // rkm-h?? 
 
-    bool operator==(const HealthPoints healthPoints1, const HealthPoints healthPoints1);
+    bool operator==(const HealthPoints healthPoints1, const HealthPoints healthPoints1);        //friend??
     bool operator!=(const HealthPoints healthPoints1, const HealthPoints healthPoints1);
     bool operator<(const HealthPoints healthPoints1, const HealthPoints healthPoints1);
     bool operator>(const HealthPoints healthPoints1, const HealthPoints healthPoints1);

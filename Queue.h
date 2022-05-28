@@ -46,7 +46,7 @@ public :
 
 
 
-
+//----------------------------------------------------------------------------------
 
 template<class T>
 Queue<T>::Iterator::Iterator(const Queue<T>* queue, int index) :
@@ -84,7 +84,7 @@ bool Queue<T>::Iterator::operator!=(const Iterator& iterator)
   //assert(queue == i.queue);  //== operator for 
   return ( m_index == iterator.m_index);
 }
-
+//----------------------------------------------------------------------------------
 
 template<class T>
 void Queue<T>::expand() 
@@ -100,7 +100,7 @@ void Queue<T>::expand()
   }
   for (int i = 0; i < size; ++i) 
   {
-    newData[i] = m_data[i];           //T should have assignment operator
+    newData[i] = m_data[i];           //T should have assignment operator  +++bdeka
   }  
   delete[] m_data;
   m_data = newData;
@@ -109,9 +109,9 @@ void Queue<T>::expand()
 
 template<class T>
 Queue<T>::Queue(int size):
-data(new T[size]),          //how to check alloc
-maxSize(size),
-nextIndex(0)
+m_data(new T[size]),          //how to check alloc
+m_maxSize(size),
+m_nextIndex(0)
 {
   if(size <= 0 )
   {
@@ -140,7 +140,7 @@ T& Queue<T>::front()
 template<class T>
 void Queue<T>::popFront()
 {
-  for (int i=0 ; i<nextIndex-1 ; ++i)   //should be nextIndex-1
+  for (int i=0 ; i<nextIndex-1 ; ++i)   //should be nextIndex-1  true
   {
     m_data[i]=m_data[i+1];            //careful for out of bounds //change next index?
     nextIndex--;
@@ -151,7 +151,7 @@ void Queue<T>::popFront()
 template<class T>
 int Queue<T>::size()
 {
-  return nextIndex; //if list is empty
+  return nextIndex; //if list is empty     no problem 
 }
 
 
@@ -160,13 +160,13 @@ Queue<T> filter(Queue<T> queue,Condition c)      //copy c'tor for T
 {                                                //template for the function object??
   Queue<T> filteredQueue;
   int size = queue.size();
-  while(size>0)                                  //> ? >=
+  while(size>0)                                  //> true ? >= false
   {
     if(c(queue.front()))
     {
       filteredQueue.pushBack(queue.front());
     }
-    queue.popFront();
+    queue.popFront();                           // hek mshaneem queue , lazm Queue<T> tmp = queue 
     size--;
   }
   return filteredQueue;
@@ -177,13 +177,31 @@ template<class T>
 Queue<T>& transform(Queue<T>& queue,Object operation)
 {
   int size = queue.size();     
-  while (size>0)                // > or >=
+  while (size>0)                // > true or >= false
   {
-  operation(queue.front());
-  queue.pushBack(queue.front());
-  queue.popFront();
-  size--;
-  }
-}
+  operation(queue.front());                // a3tked hen 6lt 
+  queue.pushBack(queue.front());           // athem sa7 hkol lazm for(int i=0 ; i<size ; i++)
+  queue.popFront();                        // { operation(m_data[i])} sa3etha lazm frined
+  size--;                                  // aw lazm Queue<T> tmp = queue; ......
+  }                                          
+} 
 
 #endif //Queue_H
+
+Queue<T>& transform(Queue<T>& queue,Object operation)
+{
+  int size = queue.size(); 
+  Queue<T> tmp = queue
+  while(size>0)
+  {
+  queue.popFront;
+  size--;
+  }
+  while (size>0)               
+  {
+  operation(tmp.front());                 
+  queue.pushBack(tmp.front());          
+  tmp.popFront();                        
+  size--;                                 
+  }                                          
+} 

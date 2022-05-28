@@ -60,15 +60,15 @@ HealthPoints HealthPoints::operator-(const int extraHealth) const
 
 HealthPoints HealthPoints::operator+(const int extraHealth, const HealthPoints& health) const
 {
-    HealthPoints result(health);
+    HealthPoints result(health);        //bzbt health+extraHealth ??
     return(result += extraHealth);
  }
 
 
  HealthPoints HealthPoints::operator-(const int extraHealth, const HealthPoints& health) const
  {
-    HealthPoints result(health);
-    health.m_hp = (-1)*health.m_hp
+    HealthPoints result(health);             
+    health.m_hp = (-1)*health.m_hp         
     return result += extraHealth;
 }
 
