@@ -25,6 +25,7 @@ class Queue
   T& front();
   void popFront();
   int size(); 
+  
   class Iterator;
   Iterator begin() const;
   Iterator end() const;  
