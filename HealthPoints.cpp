@@ -2,7 +2,7 @@
 #include <iostream>
 
 
-const int MAX_HEALTH_DEFAULT = 100;
+//const int MAX_HEALTH_DEFAULT = 100;
 
 
 HealthPoints::HealthPoints(int maxHp)
@@ -10,7 +10,7 @@ HealthPoints::HealthPoints(int maxHp)
     if(maxHp<=0)
     {
         HealthPoints::InvalidArgument e();
-        throw &e;                                        // b3rfsh aethafe 7agy
+        throw e;                                        // b3rfsh aethafe 7agy
     }                       
     else
     {
