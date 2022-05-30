@@ -42,10 +42,13 @@ class Queue
   void pushBack(T newObject);               
   T& front();
   void popFront();
-  int size(); 
+  int size() const;  //added const here
   class Iterator;
+  class ConstIterator;
   Iterator begin() const;
-  Iterator end() const;  
+  Iterator end() const; 
+  ConstIterator ConstIteratorbegin() const;
+  ConstIterator ConstIteratorend() const; 
   class EmptyQueue{};
 };
 
@@ -64,7 +67,6 @@ class Queue
    const T& operator*() const;
    Iterator& operator++();
    bool operator!=(const Iterator& iterator) const;
-
    class InvalidOperation{};
  };
 
@@ -86,7 +88,7 @@ typename Queue<T>::Iterator Queue<T>::begin() const
 template<class T>
 typename Queue<T>::Iterator Queue<T>::end() const
 {
-  return Iterator(this,(*this).size());
+  return Iterator(this,(*this).size());  // the *this is problematic
 }
 
 template<class T>
@@ -109,7 +111,63 @@ bool Queue<T>::Iterator::operator!=(const Iterator& iterator) const
   return ( m_index == iterator.m_index);
 }
 //----------------------------------------------------------------------------------
+ template<class T>
+ class Queue<T>::ConstIterator {
+   friend class Queue<T>;
+   const Queue<T>* m_queue;
+   int m_index;
+   ConstIterator(const Queue<T>* queue, int index);
+  
 
+ public :
+   const T& operator*() const;
+   ConstIterator& operator++();
+   bool operator!=(const ConstIterator& iterator) const;
+   class InvalidOperation{};
+ };
+
+
+template<class T>
+Queue<T>::ConstIterator::ConstIterator(const Queue<T>* queue, int index) :
+m_queue(queue), m_index(index)                    //assignment operator for T
+{}                       
+
+template<class T>
+const T& Queue<T>::ConstIterator::operator*() const {
+  //assert(index >= 0 && index < (m_queue.size()));       //replace the assert
+  return m_queue->m_data[m_index];   //operator ->() for Queue<T> ??
+}
+
+template<class T>
+typename Queue<T>::ConstIterator& Queue<T>::ConstIterator::operator++()
+{
+  m_index++;            //const iterator hmmmm
+  return *this;         //this should be a const iterator - we define it to be a const iterator 
+} 
+
+template<class T>
+bool Queue<T>::ConstIterator::operator!=(const ConstIterator& iterator) const
+{
+  //assert(queue == i.queue);  //== operator for 
+  return ( m_index == iterator.m_index);
+}
+
+template<class T>
+typename Queue<T>::ConstIterator Queue<T>::ConstIteratorbegin() const
+{
+  return ConstIterator(this,0);
+}
+
+
+template<class T>
+typename Queue<T>::ConstIterator Queue<T>::ConstIteratorend() const
+{
+  return ConstIterator(this,m_nextIndex); //check validity
+}
+
+
+
+//-----------------------------------------------------------------------------------
 template<class T>
 void Queue<T>::expand() 
 {
@@ -289,10 +347,55 @@ Queue<T>& transform(Queue<T>& queue,Operation operation)
   queue.pushBack(queue.front());           // athen sa7 hkol lazm for(int i=0 ; i<size ; i++)
   queue.popFront();                        // { operation(m_data[i])} sa3etha lazm frined
   size--;                                  // aw lazm Queue<T> tmp = queue; ......
-  }                                          
+  }
+  return queue;    //or queue&                                          
 } 
 
 #endif //Queue_H
-                                        
 
-                        
+
+//the purpose of making an iterator and a const iterator is to use the regular 
+// - non const iterator to change the queue that it points to 
+// for example we can use the non const iterator for the transfrom fucntion
+// while const iterator just gives you the ability to iterate over a Queue in read only
+
+//  template<class T>
+//  class Queue<T>::ConstIterator {
+//    friend class Queue<T>;
+//    const Queue<T>* m_queue;
+//    int m_index;
+//    ConstIterator(const Queue<T>* queue, int index);
+  
+
+//  public :
+//    const T& operator*() const;
+//    Iterator& operator++();
+//    bool operator!=(const Iterator& iterator) const;
+//    class InvalidOperation{};
+//  };
+
+
+// template<class T>
+// Queue<T>::ConstIterator::ConstIterator(const Queue<T>* queue, int index) :
+// m_queue(queue), m_index(index)                    //assignment operator for T
+// {}                       
+
+// template<class T>
+// const T& Queue<T>::ConstIterator::operator*() const {
+//   //assert(index >= 0 && index < (m_queue.size()));       //replace the assert
+//   return m_queue->m_data[m_index];   //operator ->() for Queue<T>
+// }
+
+// template<class T>
+// typename Queue<T>::ConstIterator& Queue<T>::Iterator::operator++()
+// {
+//   m_index++;            //const iterator hmmmm
+//   return *this;         //this should be a const iterator - we define it to be a const iterator 
+// } 
+
+// template<class T>
+// bool Queue<T>::Iterator::operator!=(const Iterator& iterator) const
+// {
+//   //assert(queue == i.queue);  //== operator for 
+//   return ( m_index == iterator.m_index);
+// }
