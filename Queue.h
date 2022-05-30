@@ -252,8 +252,8 @@ int Queue<T>::size()
 }
 
 
-template<class T>
-Queue<T> filter(Queue<T> queue,bool (*Condition)(T))      //copy c'tor for T
+template<class T,typename Condition>
+Queue<T> filter(Queue<T> queue,Condition condition)      //copy c'tor for T
 {      
   if(queue.size()==0)
   {
@@ -264,7 +264,7 @@ Queue<T> filter(Queue<T> queue,bool (*Condition)(T))      //copy c'tor for T
   int size = queue.size();
   while(size>0)                                  //> true ? >= false
   {
-    if(Condition(queue.front()))
+    if(condition(queue.front()))
     {
       filteredQueue.pushBack(queue.front());
     }
@@ -274,9 +274,8 @@ Queue<T> filter(Queue<T> queue,bool (*Condition)(T))      //copy c'tor for T
   return filteredQueue;
 }
 
-
-template<class T>
-Queue<T>& transform(Queue<T>& queue,void (*operation)(T))
+template<class T,typename Operation>
+Queue<T>& transform(Queue<T>& queue,Operation operation)
 {
   if(queue.size()==0)
   {
