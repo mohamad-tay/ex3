@@ -7,22 +7,7 @@
 const int EXPAND_RATE =2;
 const int INITIAL_SIZE = 10;
 
-
-//template<class T>
-//class Queue<T>::Iterator {
-//  friend class Queue<T>;
-//  const Queue<T>* m_queue;
-//  int m_index;
-//  Iterator(const Queue<T>* queue, int index);
-//
-//
-//public :
-//  const T& operator*() const;
-//  Iterator& operator++();
-//  bool operator!=(const Iterator& iterator) const;
-//  class InvalidOperation{};
-//};
-
+//line 74 very important comment 
 template<class T>
 class Queue
 {
@@ -42,13 +27,14 @@ class Queue
   void pushBack(T newObject);               
   T& front();
   void popFront();
+  //int size();
   int size() const;  //added const here
   class Iterator;
   class ConstIterator;
-  Iterator begin() const;
-  Iterator end() const; 
-  ConstIterator ConstIteratorbegin() const;
-  ConstIterator ConstIteratorend() const; 
+  Iterator begin();
+  Iterator end(); 
+  ConstIterator begin() const;
+  ConstIterator end() const; 
   class EmptyQueue{};
 };
 
@@ -58,15 +44,15 @@ class Queue
  template<class T>
  class Queue<T>::Iterator {
    friend class Queue<T>;
-   const Queue<T>* m_queue;
+   Queue<T>* m_queue; //typename?  //removed cons from here 
    int m_index;
-   Iterator(const Queue<T>* queue, int index);
+   Iterator(Queue<T>* queue, int index);   //removed const from queue parameter 
   
 
  public :
-   const T& operator*() const;
+   const T& operator*(); //removed const from here -- needed
    Iterator& operator++();
-   bool operator!=(const Iterator& iterator) const;
+   bool operator!=(Iterator iterator) const ;
    class InvalidOperation{};
  };
 
@@ -75,24 +61,24 @@ class Queue
 //----------------------------------------------------------------------------------
 
 template<class T>
-Queue<T>::Iterator::Iterator(const Queue<T>* queue, int index) :
+Queue<T>::Iterator::Iterator(Queue<T>* queue, int index) :
 m_queue(queue), m_index(index)                    //assignment operator for T
 {}
 
 template<class T>
-typename Queue<T>::Iterator Queue<T>::begin() const
+typename Queue<T>::Iterator Queue<T>::begin() //const problematic 
 {
   return Iterator(this,0);
 }
 
 template<class T>
-typename Queue<T>::Iterator Queue<T>::end() const
+typename Queue<T>::Iterator Queue<T>::end() //remmoved const from herer and from begin 
 {
   return Iterator(this,(*this).size());  // the *this is problematic
 }
 
 template<class T>
-const T& Queue<T>::Iterator::operator*() const {
+const T& Queue<T>::Iterator::operator*()  { //removed const from here
   //assert(index >= 0 && index < (m_queue.size()));       //replace the assert
   return m_queue->m_data[m_index];   //operator ->() for Queue<T>
 }
@@ -105,7 +91,7 @@ typename Queue<T>::Iterator& Queue<T>::Iterator::operator++()
 } 
 
 template<class T>
-bool Queue<T>::Iterator::operator!=(const Iterator& iterator) const
+bool Queue<T>::Iterator::operator!=(Iterator iterator) const //removed & from here t6l3 blmtseget brdo
 {
   //assert(queue == i.queue);  //== operator for 
   return ( m_index == iterator.m_index);
@@ -153,14 +139,14 @@ bool Queue<T>::ConstIterator::operator!=(const ConstIterator& iterator) const
 }
 
 template<class T>
-typename Queue<T>::ConstIterator Queue<T>::ConstIteratorbegin() const
+typename Queue<T>::ConstIterator Queue<T>::begin() const  //overload begin and end 
 {
   return ConstIterator(this,0);
 }
 
 
 template<class T>
-typename Queue<T>::ConstIterator Queue<T>::ConstIteratorend() const
+typename Queue<T>::ConstIterator Queue<T>::end() const
 {
   return ConstIterator(this,m_nextIndex); //check validity
 }
@@ -272,10 +258,10 @@ void Queue<T>::pushBack(T newObject)
 template<class T>
 T& Queue<T>::front()
 { 
-  if(m_nextIndex==0)
+  if(m_nextIndex<0) //test begin from index 1
   {
-    Queue<T>::EmptyQueue e();   //how can it be replaced
-    throw  e;
+    //Queue<T>::EmptyQueue error();   //how can it be replaced
+    throw  EmptyQueue();
   }
   return m_data[0];
 
@@ -285,26 +271,27 @@ T& Queue<T>::front()
 template<class T>
 void Queue<T>::popFront()
 {
-  if(m_nextIndex==0)
+  if(m_nextIndex<0)
   {
-    Queue<T>::EmptyQueue e();
-    throw e;
+    //Queue<T>::EmptyQueue error();
+    throw EmptyQueue();    //chnaged to reference 
   }
-  for (int i=0 ; i<m_nextIndex-1 ; ++i)   //should be nextIndex-1  true
+  for (int i=0 ; i<m_nextIndex-1 ; ++i)   //should be nextIndex-1  true //problem is here
   {
     m_data[i]=m_data[i+1];    //maybe try catch        //careful for out of bounds //change next index?
-    m_nextIndex--;
+    //m_nextIndex--;
   }
+    m_nextIndex--;
 }
 
 
 template<class T>
-int Queue<T>::size()
+int Queue<T>::size() const
 {
-  if(m_nextIndex==0)
+  if(m_nextIndex<0)
   {
-    Queue<T>::EmptyQueue e();
-    throw e;
+   // Queue<T>::EmptyQueue error();
+    throw EmptyQueue();
   }
   return m_nextIndex; //if list is empty     no problem 
 }
@@ -313,13 +300,12 @@ int Queue<T>::size()
 template<class T,typename Condition>
 Queue<T> filter(Queue<T> queue,Condition condition)      //copy c'tor for T
 {      
-  if(queue.size()==0)
+  if(queue.size()==0)   //== or <
   {
-    //queue::EmptyQueue e;    //was Queue<T>::EmptyQueue e(); didn't work
-    throw queue.EmptyQueue;
+    throw typename Queue<T>::EmptyQueue();
   }                                          //template for the function object??
   Queue<T> filteredQueue;
-  int size = queue.size();
+  int size = queue.size(); //hen emkn
   while(size>0)                                  //> true ? >= false
   {
     if(condition(queue.front()))
@@ -327,7 +313,7 @@ Queue<T> filter(Queue<T> queue,Condition condition)      //copy c'tor for T
       filteredQueue.pushBack(queue.front());
     }
     queue.popFront();                           // hek mshaneem queue , lazm Queue<T> tmp = queue 
-    size--;
+    //size--;
   }
   return filteredQueue;
 }
@@ -337,8 +323,8 @@ Queue<T>& transform(Queue<T>& queue,Operation operation)
 {
   if(queue.size()==0)
   {
-    //queue::EmptyQueue e; //was Queue<T>::EmptyQueue e(); didn't work
-    throw queue.EmptyQueue;
+    //typename Queue<T>::EmptyQueue e();         //no one catches here
+    throw typename Queue<T>::EmptyQueue();
   }
   int size = queue.size();     
   while (size>0)                // > true or >= false
@@ -399,3 +385,10 @@ Queue<T>& transform(Queue<T>& queue,Operation operation)
 //   //assert(queue == i.queue);  //== operator for 
 //   return ( m_index == iterator.m_index);
 // }
+
+
+//changed the non const Iterator to be non const so that there will be nom conflicts
+//between its methods and ConstIterator methods removed &from operator != in non const but it's there 
+//in constiterator 
+
+//changed e in throw to errors was conflicting - why?

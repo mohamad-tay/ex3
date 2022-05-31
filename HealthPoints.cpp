@@ -9,8 +9,8 @@ HealthPoints::HealthPoints(int maxHp)
 {
     if(maxHp<=0)
     {
-        HealthPoints::InvalidArgument e();
-        throw e;                                        // b3rfsh aethafe 7agy
+        //HealthPoints::InvalidArgument error();
+        throw InvalidArgument();                                        // b3rfsh aethafe 7agy
     }                       
     else
     {
