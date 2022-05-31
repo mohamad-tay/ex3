@@ -80,12 +80,20 @@ typename Queue<T>::Iterator Queue<T>::end() //remmoved const from herer and from
 template<class T>
 const T& Queue<T>::Iterator::operator*()  { //removed const from here
   //assert(index >= 0 && index < (m_queue.size()));       //replace the assert
-  return m_queue->m_data[m_index];   //operator ->() for Queue<T>
+    if( m_index>=m_queue->size())  //==1?
+    {
+        throw InvalidOperation();
+    }
+  return m_queue->m_data[m_index]; //operator ->() for Queue<T>
 }
 
 template<class T>
 typename Queue<T>::Iterator& Queue<T>::Iterator::operator++()
 {
+  if(m_index>=(m_queue->size()-1))
+  {
+      throw InvalidOperation();
+  }
   m_index++;            //const iterator hmmmm
   return *this;
 } 
@@ -121,12 +129,20 @@ m_queue(queue), m_index(index)                    //assignment operator for T
 template<class T>
 const T& Queue<T>::ConstIterator::operator*() const {
   //assert(index >= 0 && index < (m_queue.size()));       //replace the assert
+    if(m_index>=m_queue->size()) //added now
+    {
+        throw InvalidOperation();
+    }
   return m_queue->m_data[m_index];   //operator ->() for Queue<T> ??
 }
 
 template<class T>
 typename Queue<T>::ConstIterator& Queue<T>::ConstIterator::operator++()
 {
+    if(m_index>=m_queue->size()-1) //added now
+    {
+        throw InvalidOperation();
+    }
   m_index++;            //const iterator hmmmm
   return *this;         //this should be a const iterator - we define it to be a const iterator 
 } 
@@ -258,9 +274,9 @@ void Queue<T>::pushBack(T newObject)
 template<class T>
 T& Queue<T>::front()
 { 
-  if(m_nextIndex<0) //test begin from index 1
+  if(m_nextIndex<=0)
   {
-    //Queue<T>::EmptyQueue error();   //how can it be replaced
+    //EmptyQueue e();   //how can it be replaced
     throw  EmptyQueue();
   }
   return m_data[0];
@@ -271,7 +287,7 @@ T& Queue<T>::front()
 template<class T>
 void Queue<T>::popFront()
 {
-  if(m_nextIndex<0)
+  if(m_nextIndex<=0)
   {
     //Queue<T>::EmptyQueue error();
     throw EmptyQueue();    //chnaged to reference 
@@ -279,7 +295,6 @@ void Queue<T>::popFront()
   for (int i=0 ; i<m_nextIndex-1 ; ++i)   //should be nextIndex-1  true //problem is here
   {
     m_data[i]=m_data[i+1];    //maybe try catch        //careful for out of bounds //change next index?
-    //m_nextIndex--;
   }
     m_nextIndex--;
 }
@@ -288,11 +303,11 @@ void Queue<T>::popFront()
 template<class T>
 int Queue<T>::size() const
 {
-  if(m_nextIndex<0)
-  {
-   // Queue<T>::EmptyQueue error();
-    throw EmptyQueue();
-  }
+//  if(m_nextIndex<0)
+//  {
+//   // Queue<T>::EmptyQueue error();
+//    throw EmptyQueue();
+// }
   return m_nextIndex; //if list is empty     no problem 
 }
 
@@ -300,10 +315,10 @@ int Queue<T>::size() const
 template<class T,typename Condition>
 Queue<T> filter(Queue<T> queue,Condition condition)      //copy c'tor for T
 {      
-  if(queue.size()==0)   //== or <
-  {
-    throw typename Queue<T>::EmptyQueue();
-  }                                          //template for the function object??
+//  if(queue.size()<=0)
+//  {
+//    throw typename Queue<T>::EmptyQueue();
+//  }                                          //template for the function object??
   Queue<T> filteredQueue;
   int size = queue.size(); //hen emkn
   while(size>0)                                  //> true ? >= false
@@ -313,7 +328,7 @@ Queue<T> filter(Queue<T> queue,Condition condition)      //copy c'tor for T
       filteredQueue.pushBack(queue.front());
     }
     queue.popFront();                           // hek mshaneem queue , lazm Queue<T> tmp = queue 
-    //size--;
+    size--;
   }
   return filteredQueue;
 }
@@ -321,11 +336,11 @@ Queue<T> filter(Queue<T> queue,Condition condition)      //copy c'tor for T
 template<class T,typename Operation>
 Queue<T>& transform(Queue<T>& queue,Operation operation)
 {
-  if(queue.size()==0)
-  {
-    //typename Queue<T>::EmptyQueue e();         //no one catches here
-    throw typename Queue<T>::EmptyQueue();
-  }
+//  if(queue.size()<=0)
+//  {
+//    //typename Queue<T>::EmptyQueue e();         //no one catches here
+//    throw typename Queue<T>::EmptyQueue();
+//  }
   int size = queue.size();     
   while (size>0)                // > true or >= false
   {
