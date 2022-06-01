@@ -21,11 +21,13 @@ class Queue
   public:
   explicit Queue(int size = INITIAL_SIZE);
   Queue(const Queue& queue);
+  //Queue(Queue& queue); //added now
   ~Queue();
   Queue& operator=(const Queue& queue);
 
   void pushBack(T newObject);               
   T& front();
+  const T& front() const; //added now
   void popFront();
   //int size();
   int size() const;  //added const here
@@ -38,7 +40,16 @@ class Queue
   class EmptyQueue{};
 };
 
-
+template<class T>
+ const T& Queue<T>::front() const
+{
+    if(m_nextIndex<=0)
+    {
+        //EmptyQueue e();   //how can it be replaced
+        throw  EmptyQueue();
+    }
+    return m_data[0];
+}
 
 
  template<class T>
@@ -50,7 +61,7 @@ class Queue
   
 
  public :
-   const T& operator*(); //removed const from here -- needed
+   T& operator*(); //removed const from here -- needed
    Iterator& operator++();
    bool operator!=(Iterator iterator) const ;
    class InvalidOperation{};
@@ -78,9 +89,8 @@ typename Queue<T>::Iterator Queue<T>::end() //remmoved const from herer and from
 }
 
 template<class T>
-const T& Queue<T>::Iterator::operator*()  { //removed const from here
-  //assert(index >= 0 && index < (m_queue.size()));       //replace the assert
-    if( m_index>=m_queue->size())  //==1?
+ T& Queue<T>::Iterator::operator*()  { //removed const from here
+    if( m_index>=m_queue->size())
     {
         throw InvalidOperation();
     }
@@ -90,11 +100,11 @@ const T& Queue<T>::Iterator::operator*()  { //removed const from here
 template<class T>
 typename Queue<T>::Iterator& Queue<T>::Iterator::operator++()
 {
-  if(m_index>=(m_queue->size()-1))
-  {
-      throw InvalidOperation();
-  }
-  m_index++;            //const iterator hmmmm
+  m_index++;
+    if( m_index>m_queue->size())
+    {
+        throw InvalidOperation();
+    }
   return *this;
 } 
 
@@ -102,7 +112,7 @@ template<class T>
 bool Queue<T>::Iterator::operator!=(Iterator iterator) const //removed & from here t6l3 blmtseget brdo
 {
   //assert(queue == i.queue);  //== operator for 
-  return ( m_index == iterator.m_index);
+  return ( !(m_index == iterator.m_index)); //added ! 1.6
 }
 //----------------------------------------------------------------------------------
  template<class T>
@@ -114,7 +124,7 @@ bool Queue<T>::Iterator::operator!=(Iterator iterator) const //removed & from he
   
 
  public :
-   const T& operator*() const;
+   const T& operator*() const; //removed const from here 1.6
    ConstIterator& operator++();
    bool operator!=(const ConstIterator& iterator) const;
    class InvalidOperation{};
@@ -128,7 +138,7 @@ m_queue(queue), m_index(index)                    //assignment operator for T
 
 template<class T>
 const T& Queue<T>::ConstIterator::operator*() const {
-  //assert(index >= 0 && index < (m_queue.size()));       //replace the assert
+//  //assert(index >= 0 && index < (m_queue.size()));       //replace the assert
     if(m_index>=m_queue->size()) //added now
     {
         throw InvalidOperation();
@@ -139,11 +149,11 @@ const T& Queue<T>::ConstIterator::operator*() const {
 template<class T>
 typename Queue<T>::ConstIterator& Queue<T>::ConstIterator::operator++()
 {
-    if(m_index>=m_queue->size()-1) //added now
+  m_index++;
+    if(m_index>m_queue->size()) //added now
     {
         throw InvalidOperation();
     }
-  m_index++;            //const iterator hmmmm
   return *this;         //this should be a const iterator - we define it to be a const iterator 
 } 
 
@@ -151,7 +161,7 @@ template<class T>
 bool Queue<T>::ConstIterator::operator!=(const ConstIterator& iterator) const
 {
   //assert(queue == i.queue);  //== operator for 
-  return ( m_index == iterator.m_index);
+  return ( !(m_index == iterator.m_index)); //added ! 1.6
 }
 
 template<class T>
@@ -226,6 +236,25 @@ m_nextIndex(queue.m_nextIndex)
   }
 }
 
+//template<class T>
+//Queue<T>::Queue(Queue<T>& queue) :
+//        m_data(new T[queue.size()]),
+//        m_maxSize(queue.size()),
+//        m_nextIndex(queue.m_nextIndex)
+//{
+//    try{
+//        for (int i=0 ; i<(queue.size()) ; ++i)
+//        {
+//            m_data[i]=queue.m_data[i];
+//        }
+//    }
+//    catch (std::exception&)
+//    {
+//        delete m_data;
+//        throw;
+//    }
+//}
+
 template<class T>
 Queue<T>::~Queue()
 {
@@ -241,7 +270,7 @@ Queue<T>& Queue<T>::operator=(const Queue<T>& queue)
   }
   T* newData = new T[queue.size()];    //T should have a default c'tor //removed try catch
   m_maxSize=queue.m_maxSize;
-  m_nextIndex=queue.m_maxIndex;
+  m_nextIndex=queue.m_nextIndex;
   try 
   {
   for (int i=0 ; i<(queue.size()) ; ++i)
@@ -280,8 +309,6 @@ T& Queue<T>::front()
     throw  EmptyQueue();
   }
   return m_data[0];
-
-  
 }
 
 template<class T>
