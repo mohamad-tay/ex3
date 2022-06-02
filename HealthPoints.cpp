@@ -2,15 +2,14 @@
 #include <iostream>
 
 
-//const int MAX_HEALTH_DEFAULT = 100;
+
 
 
 HealthPoints::HealthPoints(int maxHp)
 {
     if(maxHp<=0)
     {
-        //HealthPoints::InvalidArgument error();
-        throw InvalidArgument();                                        // b3rfsh aethafe 7agy
+        throw InvalidArgument();                                        
     }                       
     else
     {
@@ -57,11 +56,10 @@ HealthPoints HealthPoints::operator-(const int extraHealth)
     return(result -= extraHealth);
 }
 
-//------------------------------------------------------------------------------------------------
 
 HealthPoints operator+(const int extraHealth, const HealthPoints& health) 
 {
-    HealthPoints result(health);        //bzbt health+extraHealth ??
+    HealthPoints result(health);        
     return(result += extraHealth);
  }
 
@@ -73,7 +71,6 @@ HealthPoints operator+(const int extraHealth, const HealthPoints& health)
     return result += extraHealth;
 }
 
- //-------------------------------------------------------------------------------------------------
 
 bool operator==(const HealthPoints& healthPoints1, const HealthPoints& healthPoints2)
 {

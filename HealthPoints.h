@@ -10,7 +10,7 @@ class HealthPoints
 
     friend bool operator==(const HealthPoints& healthPoints1, const HealthPoints& healthPoints2); 
     friend bool operator<(const HealthPoints& healthPoints1, const HealthPoints& healthPoints2);
-    friend HealthPoints operator-(const int extraHealth, const HealthPoints& health);               //check
+    friend HealthPoints operator-(const int extraHealth, const HealthPoints& health);               
     friend std::ostream& operator<<(std::ostream& os , const HealthPoints& healthPoints);
 
     public:
